@@ -1,0 +1,26 @@
+{
+  "name": "shunting-yard-js",
+  "version": "0.1.0",
+  "description": "Implementing of Shunting-yard algorithm in Javascript",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "jasmine": "^2.3.2"
+  },
+  "scripts": {
+    "test": "jasmine"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tdtrung17693/shunting-yard-js.git"
+  },
+  "keywords": [
+    "shunting-yard"
+  ],
+  "author": "T.D.T",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tdtrung17693/shunting-yard-js/issues"
+  },
+  "homepage": "https://github.com/tdtrung17693/shunting-yard-js#readme"
+}
