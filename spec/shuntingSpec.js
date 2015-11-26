@@ -33,5 +33,38 @@ describe('Convert to RPN', function () {
         expect(Shunt.parse('4 ^ 2 ^ 2 * ( 2 * ( 3 - 1 ) + 1 )')).toEqual([4,2,2,'^','^',2,3,1,'-','*',1,'+','*']);
     });
 
-    
+    it('can parse 4 * sqrt ( 2 + 1 ) + 3', function () {
+        expect(Shunt.parse('4 * sqrt ( 2 + 1 ) + 3')).toEqual([4,2,1,'+','sqrt','*', 3,'+']);
+    });
+
+    it('can parse 4 * sqrt ( sqrt ( 2 + 1 ) ) + 3', function () {
+        expect(Shunt.parse('4 * sqrt ( sqrt ( 2 + 1 ) ) + 3')).toEqual([4,2,1,'+','sqrt','sqrt','*', 3,'+']);
+    })
+
+    it('can parse 4 * sqrt ( sqrt ( 2 + abs ( 1 + 3 ) ) ) + abs ( 3 + 2 )', function () {
+        expect(Shunt.parse('4 * sqrt ( sqrt ( 2 + abs ( 1 + 3 ) ) ) + abs ( 3 + 2 )')).toEqual([4,2,1,3,'+','abs','+','sqrt','sqrt','*',3,2,'+','abs','+']);
+    });
 });
+
+describe("Calculate based on RPN", function() {
+    it('can calculate 3 + 2 + 1', function () {
+        expect(Shunt.calculate('3 + 2 + 1')).toEqual(6);
+    });
+
+    it('can calculate 3 * 2 + 1', function () {
+        expect(Shunt.calculate('3 * 2 + 1')).toEqual(7);
+    });
+
+    it('can calculate 3 ^ 2 + 1', function () {
+        expect(Shunt.calculate('3 ^ 2 + 1')).toEqual(10);
+    });
+
+    it('can calculate 3 ^ 2 ^ 1 * 3', function () {
+        expect(Shunt.calculate('3 ^ 2 ^ 1 * 3')).toEqual(27);
+    });
+
+    it('can calculate 3 + sqrt ( 3 + 1 ) * 2', function () {
+        expect(Shunt.calculate('3 + sqrt ( 3 + 1 ) * 2')).toEqual(7);
+    });
+});
+

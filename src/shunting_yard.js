@@ -11,13 +11,14 @@ module.exports = (function () {
     var patterns = '\\w|\\\+|\\\-|\\\*|\\\/|\\\(|\\\)|\\\^';
 
     var keywords = {
-        sqrt: '',
+        sqrt: Math.sqrt,
+        abs: Math.abs
     };
 
     var output = [],
         stack = [];
 
-    function parse(tokenStr) {
+    function parse(expression) {
         var tokenized,
             token,
             tmp,
@@ -26,12 +27,12 @@ module.exports = (function () {
         
         var pattern = combinePattern();
 
-        tokenized = tokenStr.match(pattern);
+        tokenized = expression.match(pattern);
 
         while (tokenized.length > 0) {
             token = tokenized.shift();
 
-            if (isOperator(token)) {
+            if (isOperator(token) || isFunction(token)) {
 
                 while (haveGreaterOperator(token)) {
                     output.push(stack.pop());
@@ -46,6 +47,11 @@ module.exports = (function () {
                     tmp = stack.pop();
 
                     if (tmp.match(/\(/)) {
+                        tmp = stack.pop();
+
+                        if (isFunction(tmp)) output.push(tmp);
+                        else stack.push(tmp);
+
                         break;
                     } else if (stack.length > 0) {
                         output.push(tmp);
@@ -79,6 +85,47 @@ module.exports = (function () {
         return result;
     }
 
+    function operate(operator, a, b) {
+        if (isFunction(operator)) {
+            return keywords[operator].call(null, a);
+        }
+
+        switch (operator) {
+            case '+':
+                return a + b;
+            case '-':
+                return a - b;
+            case '*':
+                return a * b;
+            case '/':
+                return a / b;
+            case '^':
+                return Math.pow(b,a);
+            default:
+                throw new Error('Invalid operator');
+        }
+    }
+
+    function calculate(expression) {
+        var rpn = parse(expression),
+            output = [],
+            tmp;
+
+        while (rpn.length > 0) {
+            tmp = rpn.shift();
+            
+            if (isOperator(tmp + '')) {
+                output.push(operate(tmp, output.pop(), output.pop()));
+            } else if (isFunction(tmp + '')) {
+                output.push(operate(tmp, output.pop()));
+            } else {
+                output.push(tmp);
+            }
+        }
+
+        return output.pop();
+    }
+
     function combinePattern() {
         var result = patterns;
 
@@ -94,12 +141,20 @@ module.exports = (function () {
 
         for (var i = count - 1; i >= 0; --i) {
             if (stack[i].match(/\(/)) return false;
-
-            if (precedence[operator][1].match(/Left/) && precedence[operator][0] <= precedence[ stack[i] ][0]) {
+            
+            if ( isFunction( stack[i] ) ) {
                 return true;
             }
 
-            if (precedence[operator][1].match(/Right/) && precedence[operator][0] < precedence[ stack[i] ][0]) {
+            if ( isFunction( operator ) ) {
+                return false;
+            }
+
+            if (precedence[ operator ][1].match(/Left/gi) && precedence[ operator ][0] <= precedence[ stack[i] ][0]) {
+                return true;
+            }
+
+            if (precedence[ operator ][1].match(/Right/gi) && precedence[ operator ][0] < precedence[ stack[i] ][0]) {
                 return true;
             }
         }
@@ -111,12 +166,17 @@ module.exports = (function () {
         return token.match(/\+|\-|\+|\*|\/|\^/gi);
     }
 
+    function isFunction(token) {
+        return keywords.hasOwnProperty(token) && (typeof keywords[token]).match(/Function/gi);
+    }
+
     function cleanUp() {
         output = [];
         stack = [];
     }
 
     return {
-        parse: parse
+        parse: parse,
+        calculate: calculate
     };
 })()
