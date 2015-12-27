@@ -8,8 +8,9 @@ module.exports = (function () {
         '^' : [4, 'Right']
     };
 
-    var patterns = '\\w|\\\+|\\\-|\\\*|\\\/|\\\(|\\\)|\\\^';
+    var patterns = '^-\\d+|\\d+\\.\\d+|\\d+|\\\+|\\\-|\\\*|\\\/|\\\(|\\\)|\\\^';
 
+    
     var keywords = {
         sqrt: Math.sqrt,
         abs: Math.abs
@@ -31,6 +32,17 @@ module.exports = (function () {
 
         while (tokenized.length > 0) {
             token = tokenized.shift();
+            tmp = tokenized.shift();
+
+            if (tmp != undefined) {
+                if (
+                    ((isFunction(token) || isOperator(token)) && tmp.match(/\)/)) 
+                ||  (tmp.match(/\)/) && token.match(/\(/))) {
+                    throw new Error('Invalid Expression');
+                }                
+
+              tokenized.unshift(tmp);
+            }
 
             if (isOperator(token) || isFunction(token)) {
 
@@ -42,15 +54,17 @@ module.exports = (function () {
             } else if (token.match(/\(/)) {
                 stack.push(token);
             } else if (token.match(/\)/)) {
-                // find matched parenthese
+
                 while (true) {
                     tmp = stack.pop();
 
                     if (tmp.match(/\(/)) {
                         tmp = stack.pop();
 
-                        if (isFunction(tmp)) output.push(tmp);
-                        else stack.push(tmp);
+                        if (tmp != undefined) {
+                            if (isFunction(tmp)) output.push(tmp);
+                            else stack.push(tmp);
+                        }
 
                         break;
                     } else if (stack.length > 0) {
@@ -68,7 +82,6 @@ module.exports = (function () {
 
         while (stack.length > 0) {
             tmp = stack.pop();
-
             if (tmp.match(/\(/)) {
                 cleanUp();
                 throw new Error('Parenthese Mismatched');
@@ -94,11 +107,11 @@ module.exports = (function () {
             case '+':
                 return a + b;
             case '-':
-                return a - b;
+                return b - a;
             case '*':
                 return a * b;
             case '/':
-                return a / b;
+                return b / a;
             case '^':
                 return Math.pow(b,a);
             default:
@@ -131,6 +144,7 @@ module.exports = (function () {
 
         for (var keyword in keywords) {
             result = keyword + '|' + result;
+            result = '^-' + keyword + '|' + result;
         }
 
         return new RegExp(result, 'gi');
@@ -163,7 +177,7 @@ module.exports = (function () {
     }
 
     function isOperator(token) {
-        return token.match(/\+|\-|\+|\*|\/|\^/gi);
+        return token.match(/^\-$|\+|\*|\/|\^/gi);
     }
 
     function isFunction(token) {

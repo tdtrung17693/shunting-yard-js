@@ -5,7 +5,8 @@
   "main": "index.js",
   "dependencies": {},
   "devDependencies": {
-    "jasmine": "^2.3.2"
+    "jasmine": "^2.3.2",
+    "jasmine-spec-reporter": "^2.4.0"
   },
   "scripts": {
     "test": "jasmine"
