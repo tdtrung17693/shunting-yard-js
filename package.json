@@ -3,13 +3,16 @@
   "version": "0.1.0",
   "description": "Implementing of Shunting-yard algorithm in Javascript",
   "main": "index.js",
-  "dependencies": {},
+  "dependencies": {
+    "codecov.io": "^0.1.6",
+    "istanbul": "^0.4.1"
+  },
   "devDependencies": {
     "jasmine": "^2.3.2",
     "jasmine-spec-reporter": "^2.4.0"
   },
   "scripts": {
-    "test": "jasmine"
+    "test": "istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec && cat ./coverage/lcov.info | ./node_modules/.bin/codecov"
   },
   "repository": {
     "type": "git",
